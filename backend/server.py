@@ -11,6 +11,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
 import uuid
+import json
 from datetime import datetime
 import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
