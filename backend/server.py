@@ -24,6 +24,23 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Optional Gemini configuration (will be used if API key is provided)
+gemini_api_key = os.environ.get('GEMINI_API_KEY')
+youtube_api_key = os.environ.get('YOUTUBE_API_KEY')
+
+# Configure Gemini if API key is available
+if gemini_api_key and gemini_api_key != "YOUR_GEMINI_API_KEY":
+    genai.configure(api_key=gemini_api_key)
+    generation_config = {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40,
+        "max_output_tokens": 4096,
+    }
+    has_gemini = True
+else:
+    has_gemini = False
+
 # Create the main app without a prefix
 app = FastAPI()
 
