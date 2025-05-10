@@ -37,8 +37,8 @@ const Home = () => {
     }
     
     // Simple URL validation
-    if (!inputUrl.includes('youtube.com/watch') && !inputUrl.includes('youtu.be')) {
-      setError("Please enter a valid YouTube URL");
+    if (!inputUrl.includes('youtube.com/watch') && !inputUrl.includes('youtu.be') && !inputUrl.includes('learnfromvideo.com/watch')) {
+      setError("Please enter a valid YouTube or LearnFromVideo URL");
       return;
     }
     
