@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -12,6 +12,9 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
 import uuid
 from datetime import datetime
+import google.generativeai as genai
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -67,7 +70,7 @@ class Course(BaseModel):
 def extract_video_id(url: str) -> str:
     """Extract YouTube video ID from various URL formats."""
     youtube_regex = (
-        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        r'(https?://)?(www\.)?(youtube|youtu|youtube-nocookie|learnfromvideo)\.(com|be)/'
         r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
     )
     match = re.match(youtube_regex, url)
@@ -76,54 +79,98 @@ def extract_video_id(url: str) -> str:
     return match.group(6)
 
 async def fetch_video_metadata(video_id: str) -> Dict:
-    """Placeholder for fetching video metadata - will use Google API in production."""
-    # This is a mock - in real implementation, we'd call the YouTube Data API
-    # We'll need to ask the user for a YouTube Data API key when implementing that part
+    """Fetch video metadata using YouTube API."""
+    # This is a mock - in real implementation we'd use the YouTube Data API
+    # We'd need to ask for a YouTube API key for a full implementation
+    api_url = f"https://www.googleapis.com/youtube/v3/videos?id={video_id}&key=YOUR_API_KEY&part=snippet"
+    
+    # For now, we'll just use a placeholder with the thumbnail
     mock_data = {
-        "title": f"Example Video {video_id}",
+        "title": f"Video: {video_id}",
         "description": "This is a placeholder description for the video.",
         "thumbnail_url": f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg",
     }
     return mock_data
 
+async def get_video_transcript(video_id: str) -> str:
+    """Get transcript of a YouTube video."""
+    try:
+        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+        full_transcript = " ".join([item["text"] for item in transcript_list])
+        return full_transcript
+    except (TranscriptsDisabled, NoTranscriptFound) as e:
+        # If transcript is not available, return an empty string
+        logger.warning(f"Transcript not available for video {video_id}: {str(e)}")
+        return ""
+    except Exception as e:
+        logger.error(f"Error fetching transcript for video {video_id}: {str(e)}")
+        return ""
+
+# This function would use Gemini API to process course content
+# Since we don't have an API key yet, this is a placeholder
+async def process_with_gemini(transcript: str, video_metadata: Dict) -> Dict:
+    """Process the video transcript with Gemini to create a structured course."""
+    # This is a placeholder for Gemini API integration
+    # We would need a Gemini API key for the actual implementation
+    
+    # For now, we'll return mock data with a structure of what we'd expect from Gemini
+    mock_sections = [
+        {
+            "title": "Introduction",
+            "content": "Welcome to this course! This section introduces the main concepts.",
+            "timestamp": "00:00",
+            "order": 1
+        },
+        {
+            "title": "Main Concepts",
+            "content": "The core ideas of this topic are explained here in detail.",
+            "timestamp": "03:45",
+            "order": 2
+        },
+        {
+            "title": "Practical Examples",
+            "content": "Here are some examples to help illustrate the concepts.",
+            "timestamp": "08:30",
+            "order": 3
+        },
+        {
+            "title": "Summary and Conclusion",
+            "content": "Let's review what we've learned and discuss next steps.",
+            "timestamp": "12:15",
+            "order": 4
+        },
+    ]
+    
+    mock_visualizations = [
+        {
+            "title": "Concept Map",
+            "image_url": None,  # In a real implementation, we'd generate and store an image
+            "description": "A visual representation of the main concepts covered in this video.",
+            "related_section_id": "2"
+        }
+    ]
+    
+    return {
+        "sections": mock_sections,
+        "visualizations": mock_visualizations
+    }
+
 async def process_course_content(video_id: str, video_metadata: Dict) -> Course:
-    """Create a course object with placeholder content."""
-    # This is where we'd use Gemini 2.5 Pro to process the video transcript
-    # For now, we'll create a mock course structure
+    """Create a course object from the video content."""
+    # Get the video transcript
+    transcript = await get_video_transcript(video_id)
+    
+    # Process with Gemini (currently using mock data)
+    processed_content = await process_with_gemini(transcript, video_metadata)
+    
+    # Create course object
     course = Course(
         video_id=video_id,
         title=video_metadata["title"],
         description=video_metadata["description"],
         thumbnail_url=video_metadata["thumbnail_url"],
-        sections=[
-            CourseSection(
-                title="Introduction",
-                content="Welcome to this course! This section introduces the main concepts.",
-                order=1
-            ),
-            CourseSection(
-                title="Main Concepts",
-                content="The core ideas of this topic are explained here in detail.",
-                order=2
-            ),
-            CourseSection(
-                title="Practical Examples",
-                content="Here are some examples to help illustrate the concepts.",
-                order=3
-            ),
-            CourseSection(
-                title="Summary and Conclusion",
-                content="Let's review what we've learned and discuss next steps.",
-                order=4
-            ),
-        ],
-        visualizations=[
-            CourseVisualization(
-                title="Concept Map",
-                description="A visual representation of the main concepts covered in this video.",
-                related_section_id="2"
-            )
-        ]
+        sections=[CourseSection(**section) for section in processed_content["sections"]],
+        visualizations=[CourseVisualization(**vis) for vis in processed_content["visualizations"]]
     )
     
     # Store in database
