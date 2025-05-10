@@ -182,7 +182,6 @@ async def process_with_gemini(transcript: str, video_metadata: Dict) -> Dict:
                     json_str = response_text[json_start:json_end]
                     return json.loads(json_str)
                 raise ValueError("No valid JSON found in response")
-                raise ValueError("No valid JSON found in response")
             except Exception as e:
                 # If parsing fails, fall back to mock data
                 logger.error(f"Error parsing Gemini response: {str(e)}")
