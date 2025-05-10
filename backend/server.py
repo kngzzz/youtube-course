@@ -125,13 +125,75 @@ async def get_video_transcript(video_id: str) -> str:
         return ""
 
 # This function would use Gemini API to process course content
-# Since we don't have an API key yet, this is a placeholder
 async def process_with_gemini(transcript: str, video_metadata: Dict) -> Dict:
     """Process the video transcript with Gemini to create a structured course."""
-    # This is a placeholder for Gemini API integration
-    # We would need a Gemini API key for the actual implementation
     
-    # For now, we'll return mock data with a structure of what we'd expect from Gemini
+    if has_gemini and transcript:
+        try:
+            # Use Gemini to process the transcript
+            model = genai.GenerativeModel("gemini-pro")
+            prompt = f"""
+            You are an expert educator who specializes in creating structured educational content.
+            
+            Please analyze the following video transcript and create a structured course with clear sections.
+            
+            Video Title: {video_metadata['title']}
+            Video Description: {video_metadata['description']}
+            
+            Transcript:
+            {transcript[:10000]}  # Truncate if too long
+            
+            Create a structured course with the following:
+            1. 4-8 logical sections, each with a title and detailed content
+            2. Each section should have a timestamp if you can identify when in the video that section starts
+            3. Also create one visualization idea for the course (a diagram or chart that would help illustrate a key concept)
+            
+            Format your response as a JSON object with the following structure:
+            {{
+                "sections": [
+                    {{
+                        "title": "Section Title",
+                        "content": "Detailed content for this section",
+                        "timestamp": "MM:SS",
+                        "order": 1
+                    }},
+                    ...
+                ],
+                "visualizations": [
+                    {{
+                        "title": "Visualization Title",
+                        "description": "Description of what this visualization shows",
+                        "related_section_id": "1" // The order number of the related section
+                    }}
+                ]
+            }}
+            
+            Ensure the content is educational, well-structured, and enhances learning.
+            """
+            
+            response = model.generate_content(prompt, generation_config=generation_config)
+            try:
+                # Try to parse the response as JSON
+                response_text = response.text
+                # Find the JSON part if there's any text before or after
+                json_start = response_text.find('{')
+                json_end = response_text.rfind('}') + 1
+                if json_start >= 0 and json_end > json_start:
+                    json_str = response_text[json_start:json_end]
+                    return json.loads(json_str)
+                raise ValueError("No valid JSON found in response")
+            except Exception as e:
+                # If parsing fails, fall back to mock data
+                logger.error(f"Error parsing Gemini response: {str(e)}")
+                return get_mock_data()
+        except Exception as e:
+            logger.error(f"Error using Gemini API: {str(e)}")
+            return get_mock_data()
+    
+    return get_mock_data()
+
+def get_mock_data():
+    """Return mock data when Gemini API is not available or fails."""
     mock_sections = [
         {
             "title": "Introduction",
