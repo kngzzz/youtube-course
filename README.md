@@ -1,150 +1,175 @@
-# YouTube Course Generator
+# LearnFromVideo - AI-Powered YouTube Course Generator
 
-A full-stack application that converts YouTube videos into structured educational courses using AI.
+![LearnFromVideo Banner](https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg)
 
-## Features
-- Convert YouTube videos into structured courses with logical sections
-- AI-powered content organization using Google Gemini
-- Automatic transcript extraction from YouTube videos
-- MongoDB storage for created courses
-- Modern React frontend with responsive design
-- Docker containerization for easy deployment
+## 🚀 Product Overview
 
-## Tech Stack
-- **Frontend**: 
-  - React 19 with hooks
-  - TailwindCSS for styling
-  - React Router for navigation
-  - Axios for API calls
-- **Backend**: 
-  - FastAPI framework
-  - Python 3.11
-  - Async MongoDB driver
-  - YouTube Transcript API
-- **Database**: MongoDB (Atlas or local)
-- **AI Integration**: Google Gemini API
-- **Infrastructure**: 
-  - Docker for containerization
-  - Nginx as reverse proxy
-  - Multi-stage Docker builds
+LearnFromVideo is an innovative AI-powered platform that transforms any YouTube video into a structured, educational course. Simply paste a YouTube URL or use our easy URL conversion (just replace "youtube.com" with "learnfromvideo.com" in any YouTube URL), and our AI will generate a beautifully organized course with:
 
-## Prerequisites
-- Node.js 20+
-- Python 3.11
-- Docker and Docker Compose
-- MongoDB Atlas account or local MongoDB instance
-- Google Gemini API key (optional for AI features)
-- YouTube API key (optional for enhanced metadata)
+- 📚 **Structured Content**: Automatically organized into logical sections
+- 🖼️ **Interactive Diagrams**: Visual representations of key concepts
+- 💬 **Conversational AI**: Ask questions about any part of the course
+- 📱 **Responsive Design**: Beautiful on any device
 
-## Setup Instructions
+Perfect for students, educators, and lifelong learners who want to extract maximum value from educational YouTube content.
 
-### Development Environment
-1. Clone the repository:
-   ```bash
-   git clone [repository-url]
-   cd youtube-course
+## ✨ Features
+
+- **URL Conversion**: Simply replace "youtube.com" with "learnfromvideo.com" in any YouTube URL
+- **AI Content Processing**: Uses Gemini 2.5 Pro to analyze and structure video content
+- **Transcript Extraction**: Automatically retrieves and processes video transcripts
+- **Visual Learning Aids**: Generates diagrams and visualizations to enhance understanding
+- **Interactive Q&A**: Conversational AI to answer questions about the course content
+- **Beautiful UI**: Intuitive, responsive design for a great learning experience
+
+## 📋 Prerequisites
+
+- Python 3.10+ for the backend
+- Node.js 16+ for the frontend
+- MongoDB (local installation or MongoDB Atlas)
+- API keys for:
+  - Google Gemini (for AI processing)
+  - YouTube Data API (for video metadata)
+
+## 🔧 Installation
+
+### Windows Installation
+
+1. **Clone the repository**
+   ```
+   git clone https://github.com/yourusername/learnfromvideo.git
+   cd learnfromvideo
    ```
 
-2. Configure environment variables:
-   - Backend: Create `.env` file in `backend/` with:
-     ```
-     MONGO_URL=mongodb://localhost:27017
-     DB_NAME=youtube_courses
-     GEMINI_API_KEY=your_key_here (optional)
-     YOUTUBE_API_KEY=your_key_here (optional)
-     ```
-   - Frontend: Create `.env` file in `frontend/` with:
-     ```
-     REACT_APP_API_URL=http://localhost:8001
-     ```
-
-3. Install dependencies:
-   ```bash
-   # Frontend
-   cd frontend && yarn install
-
-   # Backend
-   cd ../backend && pip install -r requirements.txt
+2. **Set up the backend**
+   ```
+   cd backend
+   python -m venv venv
+   venv\\Scripts\\activate
+   pip install -r requirements.txt
    ```
 
-4. Run services:
-   ```bash
-   # Start MongoDB (if using local)
-   docker run -d -p 27017:27017 --name mongo mongo
-
-   # Backend
-   cd backend && uvicorn server:app --reload --port 8001
-
-   # Frontend (in separate terminal)
-   cd frontend && yarn start
+3. **Create .env file in the backend directory**
+   ```
+   MONGO_URL="mongodb://localhost:27017"
+   DB_NAME="learnfromvideo"
+   GEMINI_API_KEY="your_gemini_api_key"
+   YOUTUBE_API_KEY="your_youtube_api_key"
    ```
 
-## Configuration
+4. **Set up the frontend**
+   ```
+   cd ../frontend
+   npm install
+   ```
 
-### Required Environment Variables
-- `MONGO_URL`: MongoDB connection string
-- `DB_NAME`: Database name for courses
-- `FRONTEND_ENV`: Comma-separated frontend variables (API_URL)
+5. **Create .env file in the frontend directory**
+   ```
+   REACT_APP_BACKEND_URL="http://localhost:8001"
+   ```
 
-### Optional Environment Variables
-- `GEMINI_API_KEY`: For AI-powered content processing
-- `YOUTUBE_API_KEY`: For enhanced video metadata
+6. **Start MongoDB** (if using local installation)
+   ```
+   mongod --dbpath=data
+   ```
 
-## API Documentation
+7. **Start the application**
+   ```
+   # Terminal 1 (Backend)
+   cd backend
+   venv\\Scripts\\activate
+   uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 
-### Endpoints
-- `POST /api/convert-youtube`: Convert YouTube URL to course
-  ```json
-  {
-    "video_url": "https://youtube.com/watch?v=example"
-  }
-  ```
+   # Terminal 2 (Frontend)
+   cd frontend
+   npm start
+   ```
 
-- `GET /api/courses`: List all courses
-- `GET /api/courses/{id}`: Get specific course by ID
-- `GET /api/status`: Service health check
+### macOS/Linux Installation
 
-## Deployment
+1. **Clone the repository**
+   ```
+   git clone https://github.com/yourusername/learnfromvideo.git
+   cd learnfromvideo
+   ```
 
-### Docker Build
-```bash
-docker build -t youtube-course .
-```
+2. **Set up the backend**
+   ```
+   cd backend
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-### Docker Run
-```bash
-docker run -p 8080:8080 \
-  -e MONGO_URL=mongodb://host.docker.internal:27017 \
-  -e DB_NAME=youtube_courses \
-  youtube-course
-```
+3. **Create .env file in the backend directory**
+   ```
+   MONGO_URL="mongodb://localhost:27017"
+   DB_NAME="learnfromvideo"
+   GEMINI_API_KEY="your_gemini_api_key"
+   YOUTUBE_API_KEY="your_youtube_api_key"
+   FAL_KEY="your_fal_api_key"
+   ```
 
-### Docker Compose
-```yaml
-version: '3'
-services:
-  app:
-    image: youtube-course
-    ports:
-      - "8080:8080"
-    environment:
-      - MONGO_URL=mongodb://mongo:27017
-      - DB_NAME=youtube_courses
-    depends_on:
-      - mongo
+4. **Set up the frontend**
+   ```
+   cd ../frontend
+   npm install
+   ```
 
-  mongo:
-    image: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+5. **Create .env file in the frontend directory**
+   ```
+   REACT_APP_BACKEND_URL="http://localhost:8001"
+   ```
 
-volumes:
-  mongo_data:
-```
+6. **Start MongoDB** (if using local installation)
+   ```
+   mongod --dbpath=data
+   ```
 
-## Troubleshooting
-- If YouTube transcripts aren't available, ensure the video has captions enabled
-- For AI features, verify your Gemini API key is valid
-- Check MongoDB connection if courses aren't saving
+7. **Start the application**
+   ```
+   # Terminal 1 (Backend)
+   cd backend
+   source venv/bin/activate
+   uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+
+   # Terminal 2 (Frontend)
+   cd frontend
+   npm start
+   ```
+
+## ⚙️ Configuration
+
+### API Keys
+
+To use all features of LearnFromVideo, you'll need to obtain the following API keys:
+
+1. **Google Gemini API Key**
+   - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Create a new API key
+   - Add to your backend `.env` file as `GEMINI_API_KEY`
+
+2. **YouTube Data API Key**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project
+   - Enable the YouTube Data API v3
+   - Create credentials and get the API key
+   - Add to your backend `.env` file as `YOUTUBE_API_KEY`
+
+
+## 🖥️ Usage
+
+1. Open your browser and navigate to `http://localhost:3000`
+2. Enter a YouTube URL in the input field and click "Create Course"
+3. Alternatively, replace "youtube.com" with "learnfromvideo.com" in any YouTube URL and paste it in your browser
+4. Wait for the AI to process the video (this may take a few seconds)
+5. Explore the structured course content, visualizations, and use the chat interface to ask questions
+
+## 🔮 Future Improvements
+
+- Enhanced diagram generation with more types of visual aids
+- Expanded conversational AI capabilities
+- Downloadable course materials (PDF, EPUB)
+- User accounts and saved courses
+- Collaborative learning features
+- Mobile applications
